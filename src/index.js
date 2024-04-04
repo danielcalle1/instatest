@@ -211,7 +211,10 @@ function createOrder() {
       .then((response) => response.json())
       .then((data) => {
         console.log("Orden creada exitosamente:", data);
-        // Aquí puedes agregar lógica adicional para manejar la respuesta de la creación de la orden
+        // Ocultar lista de slots
+        document.getElementById("slotsList").style.display = "none";
+        // Renderizar los detalles de la orden
+        getOrderDetails(data.job_id);
       })
       .catch((error) => console.error("Error al crear la orden:", error));
   } else {
@@ -233,4 +236,69 @@ function generateRandomClientReference() {
   // Genera un número aleatorio entre 0 y 99999 y lo convierte en un string de 5 dígitos
   const randomNum = Math.floor(Math.random() * 100000);
   return randomNum.toString().padStart(5, "0"); // Rellena con ceros a la izquierda si es necesario
+}
+function getOrderDetails(jobId) {
+  const apiUrl = `https://api.xandar.instaleap.io/jobs/${jobId}`;
+  const headers = {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+    "x-api-key": "yoJYongi4V4m0S4LClubdyiu5nq6VIpxazcFaghi",
+  };
+
+  fetch(apiUrl, {
+    method: "GET",
+    headers: headers,
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      renderOrderReceipt(data);
+    })
+    .catch((error) =>
+      console.error("Error al obtener los detalles de la orden:", error),
+    );
+}
+
+function renderOrderReceipt(orderDetails) {
+  const receiptContainer = document.getElementById("orderReceipt");
+  receiptContainer.innerHTML = ""; // Limpiamos el contenedor antes de renderizar
+  // Renderizar cada campo del detalle de la orden en forma de recibo
+  const fieldsToRender = [
+    { label: "Client ID", value: orderDetails.client_id },
+    {
+      label: "Start Time",
+      value: new Date(orderDetails.start_time).toLocaleString(),
+    },
+    {
+      label: "End Time",
+      value: new Date(orderDetails.end_time).toLocaleString(),
+    },
+    { label: "State", value: orderDetails.state },
+    { label: "Operational Model", value: orderDetails.operational_model },
+    {
+      label: "Destination",
+      value: `${orderDetails.destination.name}, ${orderDetails.destination.address}, ${orderDetails.destination.city}, ${orderDetails.destination.country}, ${orderDetails.destination.description}`,
+    },
+    { label: "Total Items", value: orderDetails.total_items },
+    { label: "Items Replaced", value: orderDetails.items_replaced },
+    { label: "Items", value: renderItems(orderDetails.items) },
+    { label: "Collect With", value: JSON.stringify(orderDetails.collect_with) },
+    { label: "Recipient", value: JSON.stringify(orderDetails.recipient) },
+    { label: "Store", value: JSON.stringify(orderDetails.store) },
+    { label: "Payment Info", value: JSON.stringify(orderDetails.payment_info) },
+  ];
+
+  fieldsToRender.forEach((field) => {
+    const fieldElement = document.createElement("div");
+    fieldElement.innerHTML = `<strong>${field.label}:</strong> ${field.value}`;
+    receiptContainer.appendChild(fieldElement);
+  });
+}
+
+function renderItems(items) {
+  return items
+    .map(
+      (item) =>
+        `${item.name} - Quantity: ${item.quantity}, Unit: ${item.unit}, Amount: ${item.presentation.price.amount}, Currency: ${item.presentation.price.currency}, Weight: ${item.weight}, EAN: ${item.attributes.ean}, PLU: ${item.attributes.plu}`,
+    )
+    .join("<br>");
 }
