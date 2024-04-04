@@ -1,0 +1,19 @@
+.slot-card {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.slot-card input[type="checkbox"] {
+  margin-right: 10px;
+}
+
+.slot-time {
+  margin-right: auto;
+}
+.slot-card.selected {
+  background-color: #f0f0f0; /* Color de fondo gris claro */
+}
