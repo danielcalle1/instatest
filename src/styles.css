@@ -14,9 +14,11 @@
 .slot-time {
   margin-right: auto;
 }
+
 .slot-card.selected {
   background-color: #f0f0f0; /* Color de fondo gris claro */
 }
+
 .content-container {
   height: 200px; /* Establece un alto fijo para el contenedor */
   overflow-y: auto; /* Agrega una barra de desplazamiento vertical si es necesario */

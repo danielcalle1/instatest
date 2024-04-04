@@ -8,12 +8,19 @@
 </head>
 <body>
     <h1>Prueba de API</h1>
-    <div class="content-container">
+    <main>
         <button id="startConsultation">Iniciar Consulta Availability</button>
         <button id="createOrder" style="display: none;">Crear Orden</button>
-        <section id="slotsList"></section>
-        <section id="orderReceipt"></section>
-    </div>
+        <div id="valueInputContainer" class="content-container">
+            <section id="slotsList"></section>
+            <section id="orderReceipt"></section>
+        </div>
+        <aside id="invoice" style="display: none;">
+            <label for="valueInput">Ingrese el valor para la factura:</label>
+            <input type="number" id="valueInput" name="valueInput">
+            <button onclick="updatePaymentInfo()">Facturar Pedido</button>
+        </aside>
+    </main>
 
     <script src="index.js"></script>
 </body>

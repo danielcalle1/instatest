@@ -4,6 +4,7 @@ document
 document.getElementById("createOrder").addEventListener("click", createOrder);
 
 let selectedSlot = null; // Variable para almacenar el slot seleccionado
+let jobIdGlobal = ""; // Variable global para almacenar el job_id
 
 function startConsultation() {
   const apiUrl = "https://api.xandar.instaleap.io/jobs/availability/v2";
@@ -150,6 +151,7 @@ function handleCheckboxClick(clickedCheckbox, slot, slotCard) {
     hideCreateOrderButton(); // Oculta el botón Crear Orden
   }
 }
+
 function createOrder() {
   if (selectedSlot) {
     const orderId = selectedSlot.id;
@@ -237,6 +239,7 @@ function generateRandomClientReference() {
   const randomNum = Math.floor(Math.random() * 100000);
   return randomNum.toString().padStart(5, "0"); // Rellena con ceros a la izquierda si es necesario
 }
+
 function getOrderDetails(jobId) {
   const apiUrl = `https://api.xandar.instaleap.io/jobs/${jobId}`;
   const headers = {
@@ -251,6 +254,7 @@ function getOrderDetails(jobId) {
   })
     .then((response) => response.json())
     .then((data) => {
+      jobIdGlobal = jobId;
       renderOrderReceipt(data);
     })
     .catch((error) =>
@@ -292,6 +296,8 @@ function renderOrderReceipt(orderDetails) {
     fieldElement.innerHTML = `<strong>${field.label}:</strong> ${field.value}`;
     receiptContainer.appendChild(fieldElement);
   });
+
+  document.getElementById("invoice").style.display = "block";
 }
 
 function renderItems(items) {
@@ -301,4 +307,44 @@ function renderItems(items) {
         `${item.name} - Quantity: ${item.quantity}, Unit: ${item.unit}, Amount: ${item.presentation.price.amount}, Currency: ${item.presentation.price.currency}, Weight: ${item.weight}, EAN: ${item.attributes.ean}, PLU: ${item.attributes.plu}`,
     )
     .join("<br>");
+}
+
+function updatePaymentInfo() {
+  const value = document.getElementById("valueInput").value;
+
+  const apiUrl = `https://api.xandar.instaleap.io/jobs/${jobIdGlobal}/payment_info`;
+  const headers = {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+    "x-api-key": "yoJYongi4V4m0S4LClubdyiu5nq6VIpxazcFaghi",
+  };
+  const requestBody = {
+    payment: {
+      id: "string",
+      payment_status: "FAILED",
+      method: "CASH",
+      reference: "string",
+      value: parseInt(value), // Convertir a entero
+      payment_status_details: "string",
+      method_details: "string",
+      blocking_policy: "CHECKOUT",
+    },
+  };
+
+  fetch(apiUrl, {
+    method: "PUT",
+    headers: headers,
+    body: JSON.stringify(requestBody),
+  })
+    .then((response) => {
+      if (response.ok) {
+        alert("Su pedido ha sido facturado");
+      } else {
+        throw new Error("No se pudo facturar pedido");
+      }
+    })
+    .catch((error) => {
+      console.error("Error al facturar pedido:", error);
+      alert("No se pudo facturar pedido");
+    });
 }
