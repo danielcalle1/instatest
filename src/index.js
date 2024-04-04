@@ -1,6 +1,7 @@
 document
   .getElementById("startConsultation")
   .addEventListener("click", startConsultation);
+document.getElementById("createOrder").addEventListener("click", createOrder);
 
 let selectedSlot = null; // Variable para almacenar el slot seleccionado
 
@@ -130,6 +131,7 @@ function handleSlotCardClick(slot, slotCard) {
   if (checkbox) {
     checkbox.checked = !checkbox.checked;
     handleCheckboxClick(checkbox, slot, slotCard);
+    showCreateOrderButton(); // Muestra el botón Crear Orden
   }
 }
 
@@ -139,10 +141,96 @@ function handleCheckboxClick(clickedCheckbox, slot, slotCard) {
       selectedSlot.checkbox.checked = false;
       selectedSlot.card.classList.remove("selected");
     }
-    selectedSlot = { checkbox: clickedCheckbox, card: slotCard };
+    selectedSlot = { checkbox: clickedCheckbox, card: slotCard, id: slot.id };
     selectedSlot.card.classList.add("selected");
+    showCreateOrderButton(); // Muestra el botón Crear Orden
   } else {
     selectedSlot = null;
     slotCard.classList.remove("selected");
+    hideCreateOrderButton(); // Oculta el botón Crear Orden
   }
+}
+function createOrder() {
+  if (selectedSlot) {
+    const orderId = selectedSlot.id;
+    const clientReference = generateRandomClientReference(); // Genera un cliente de referencia aleatorio
+    const apiUrl = "https://api.xandar.instaleap.io/jobs";
+    const headers = {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      "x-api-key": "yoJYongi4V4m0S4LClubdyiu5nq6VIpxazcFaghi",
+    };
+    const requestBody = {
+      slot_id: orderId,
+      client_reference: clientReference, // Usa el cliente de referencia aleatorio
+      recipient: {
+        name: "Daniel",
+        email: "daniel@gmail.com",
+        phone_number: "13454",
+        identification: {
+          number: "234324",
+          type: "cc",
+        },
+      },
+      payment_info: {
+        currency_code: "COP",
+        prices: {
+          subtotal: 1000,
+          shipping_fee: 10,
+          discounts: 0,
+          taxes: 10,
+          order_value: 900,
+          attributes: [],
+          additional_info: [],
+        },
+        payment: {
+          id: "9876",
+          payment_status: "FAILED",
+          method: "CASH",
+          reference: "IP",
+          value: 1000,
+          payment_status_details: "FAL",
+          method_details: "FAL",
+          blocking_policy: "CHECKOUT",
+        },
+      },
+      add_delivery_code: true,
+      job_comment: "Comment",
+      contact_less: {
+        comment: "LeaveAtTheDoor",
+        cash_receiver: "MR",
+        phone_number: "23454",
+      },
+    };
+
+    fetch(apiUrl, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(requestBody),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Orden creada exitosamente:", data);
+        // Aquí puedes agregar lógica adicional para manejar la respuesta de la creación de la orden
+      })
+      .catch((error) => console.error("Error al crear la orden:", error));
+  } else {
+    console.error("No se ha seleccionado ningún slot.");
+  }
+}
+
+function showCreateOrderButton() {
+  const createOrderButton = document.getElementById("createOrder");
+  createOrderButton.style.display = "inline-block"; // Hace visible el botón Crear Orden
+}
+
+function hideCreateOrderButton() {
+  const createOrderButton = document.getElementById("createOrder");
+  createOrderButton.style.display = "none"; // Oculta el botón Crear Orden
+}
+
+function generateRandomClientReference() {
+  // Genera un número aleatorio entre 0 y 99999 y lo convierte en un string de 5 dígitos
+  const randomNum = Math.floor(Math.random() * 100000);
+  return randomNum.toString().padStart(5, "0"); // Rellena con ceros a la izquierda si es necesario
 }
